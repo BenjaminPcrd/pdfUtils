@@ -3,11 +3,11 @@ const PDFJS = require('pdfjs-dist')
 const { PDFDocument } = require('pdf-lib')
 
 // Get the location of the client name on the bill
-async function getTextFromLocation(page, textLocation) {
+async function getTextFromLocation(page, textLocation, index) {
     const content = await page.getTextContent()
     const text = content.items.find(item => 
         item.transform[5] === textLocation.x && item.transform[4] === textLocation.y && item.width > 0 && item.height > 0
-    ).str
+    )?.str || `pdf_${index}`
     return text
 }
 
@@ -26,9 +26,9 @@ async function splitPdf(filePath, textCoord) {
     // Iterate over the pages and extract them as separate files
     for (let i = 0; i < numPages; i++) {
         const pdfjsPage = await pdfjsDoc.getPage(i + 1)
-        const text = await getTextFromLocation(pdfjsPage, textCoord)
+        const text = await getTextFromLocation(pdfjsPage, textCoord, i)
         const fomattedText = text.split(' ').slice(1).join('_').trim()
-        const fileName = `pdf_${fomattedText}_${i + 1}` || `pdf_${i + 1}`
+        const fileName = `JP_ASAP_${fomattedText}` || `pdf_${i + 1}`
 
         const pdfDocCopy = await PDFDocument.create()
         const copiedPages = await pdfDocCopy.copyPages(pdfDoc, [i])
@@ -39,5 +39,5 @@ async function splitPdf(filePath, textCoord) {
     }
 }
 
-const textCoords = { x: 682.2, y: 346.69 }
+const textCoords = { x: 671.4, y: 343.1 }
 splitPdf('merged.pdf', textCoords).catch(console.error)
