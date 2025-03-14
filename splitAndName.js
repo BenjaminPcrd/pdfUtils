@@ -7,6 +7,7 @@ const getName = async (page) => {
   const item = content.items.find(
     (item) => item.str.startsWith("Monsieur") || item.str.startsWith("Madame")
   );
+  if (!item) return;
   return item.str.split(" ").slice(1).join("_").trim();
 };
 
@@ -26,7 +27,7 @@ const splitPdf = async (filePath) => {
   for (let i = 0; i < numPages; i++) {
     const pdfjsPage = await pdfjsDoc.getPage(i + 1);
     const name = await getName(pdfjsPage);
-    const fileName = `JP_ASAP_${name}` || `pdf_${i + 1}`;
+    const fileName = name ? `JP_ASAP_${name}` : `JP_ASAP_NOM_Prénom_${i + 1}`;
 
     const pdfDocCopy = await PDFDocument.create();
     const copiedPages = await pdfDocCopy.copyPages(pdfDoc, [i]);
